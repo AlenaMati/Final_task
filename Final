@@ -1,0 +1,51 @@
+import math
+from shapely.geometry import Point
+
+lineSegments = [((1, -1), (1, 1)), ((2, -1), (2, 1)), ((2, 8), (4, 6)), ((3, 3), (5, 1))]
+distancesList = []
+dictionary = {}
+
+
+def check_intersection(point: tuple, start_point: Point, end_point: Point, start_line: Point, end_line: Point, line: tuple) -> (Point, bool):
+    a1 = start_line.x - end_line.x
+    b1 = end_line.y - start_line.y
+    c1 = b1 * start_line.x + a1 * start_line.y
+    a2 = start_point.x - end_point.x
+    b2 = end_point.y - start_point.y
+    c2 = b2 * start_point.x + a2 * start_point.y
+
+    determinant = b1 * a2 - b2 * a1
+    if determinant == 0:
+        return Point(10 * 9, 10 * 9), False
+    else:
+        x = round(((a2 * c1 - a1 * c2) / determinant), 2)
+        y = round(((b1 * c2 - b2 * c1) / determinant), 2)
+        x1, y1 = point
+        x2, y2 = (x, y)
+        distance = round(math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2), 2)
+        distancesList.append(distance)
+        dictionary[distance] = line
+        # print("Current dictionary of distances and lines: " + str(dictionary))
+
+
+def closest_line(dic: dict):
+    for d in distancesList:
+        if d == min(distancesList):
+            return dic.get(d)
+        else:
+            return "No intersection found"
+
+
+def return_closest_line(point: tuple, angle: int):
+    start = Point(point)
+    length = 1000
+    end = Point(start.x + length * math.cos(angle), start.y + length * math.sin(angle))
+
+    for segment in lineSegments:
+        start_s, end_s = segment
+        start_s = Point(start_s)
+        end_s = Point(end_s)
+        check_intersection(point, start, end, start_s, end_s, segment)
+    return f'The closest line to point {point} with angle of {angle} degree: {closest_line(dictionary)}.'
+
+# print(return_closest_line((0, 0), 30))
